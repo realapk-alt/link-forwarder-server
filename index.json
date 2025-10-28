@@ -1,12 +1,12 @@
-// index.js (Vercel Forwarder Code)
+// index.js (Vercel Forwarder Code - FINAL FIX)
 
 const express = require('express');
 const fetch = require('node-fetch'); 
 const app = express();
 
 // --- CONFIGURATION ---
-// IMPORTANT: Replace with your actual, latest Apps Script URL (from Step 1)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY89CgUXE6Ifu6Auqt7eOcpBvJmON1146bIFFx-kZkHgS6yJaHIANdl_hXqZM8tAb-Kg/exec'; // <--- यहाँ URL डालें
+// IMPORTANT: Replace with your actual, latest Apps Script URL
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY89CgUXE6Ifu6Auqt7eOcpBvJmON1146bIFFx-kZkHgS6yJaHIANdl_hXqZM8tAb-Kg/exec'; // <--- यहाँ Apps Script URL डालें
 // --------------------
 
 app.get('/:slug', async (req, res) => {
@@ -18,20 +18,33 @@ app.get('/:slug', async (req, res) => {
     
     try {
         const response = await fetch(fetchUrl);
+        
+        // 🛑 FIX: Use response.text() for clean plain text URL
         const finalUrl = await response.text(); 
 
         // 2. Error Handling 
         if (finalUrl.startsWith('Error:')) {
+            // Log the error for Vercel/GitHub debugging
+            console.error('Apps Script Error:', finalUrl);
             return res.status(404).send(`<h1>404 Not Found</h1><p>${finalUrl}</p>`);
         }
+        
+        // 🛑 CRITICAL CHECK: Ensure the URL starts with http (absolute URL)
+        if (!finalUrl.startsWith('http')) {
+             return res.status(500).send(`<h1>500 Internal Error</h1><p>Apps Script returned invalid URL format: ${finalUrl}</p>`);
+        }
 
-        // 3. 100% GUARANTEED REDIRECT (Vercel Server Redirect)
+        // 3. 100% GUARANTEED REDIRECT (HTTP 302)
         res.redirect(302, finalUrl);
         
     } catch (error) {
-        res.status(500).send('Server Error: Failed to connect to Apps Script backend.');
+        console.error('Forwarder Fetch Failed:', error);
+        res.status(500).send('Forwarder Server Error: Failed to connect to Apps Script backend.');
     }
 });
 
+// Start the server 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+    console.log(`Forwarder running on port ${PORT}`);
+});
