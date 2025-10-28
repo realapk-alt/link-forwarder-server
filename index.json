@@ -1,0 +1,37 @@
+// index.js (Vercel Forwarder Code)
+
+const express = require('express');
+const fetch = require('node-fetch'); 
+const app = express();
+
+// --- CONFIGURATION ---
+// IMPORTANT: Replace with your actual, latest Apps Script URL (from Step 1)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyY89CgUXE6Ifu6Auqt7eOcpBvJmON1146bIFFx-kZkHgS6yJaHIANdl_hXqZM8tAb-Kg/exec'; // <--- यहाँ URL डालें
+// --------------------
+
+app.get('/:slug', async (req, res) => {
+    const slug = req.params.slug;
+    const password = req.query.p || '';
+    
+    // 1. Apps Script से Final URL Fetch करें
+    const fetchUrl = `${APPS_SCRIPT_URL}?s=${slug}&p=${password}`;
+    
+    try {
+        const response = await fetch(fetchUrl);
+        const finalUrl = await response.text(); 
+
+        // 2. Error Handling 
+        if (finalUrl.startsWith('Error:')) {
+            return res.status(404).send(`<h1>404 Not Found</h1><p>${finalUrl}</p>`);
+        }
+
+        // 3. 100% GUARANTEED REDIRECT (Vercel Server Redirect)
+        res.redirect(302, finalUrl);
+        
+    } catch (error) {
+        res.status(500).send('Server Error: Failed to connect to Apps Script backend.');
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {});
