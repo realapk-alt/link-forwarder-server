@@ -4,7 +4,8 @@
   "description": "External server to handle safe redirects.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "echo 'No build step required'"  // <--- यह लाइन जोड़ें
   },
   "dependencies": {
     "express": "^4.19.2",
