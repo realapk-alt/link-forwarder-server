@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "echo 'No build step required'"  // <--- यह लाइन जोड़ें
+    "build": "echo 'No build step required'"  // <--- यह महत्वपूर्ण FIX है
   },
   "dependencies": {
     "express": "^4.19.2",
